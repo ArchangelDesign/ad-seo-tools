@@ -1,0 +1,20 @@
+{
+  "name": "",
+  "description": "",
+  "license": "BSD-3-Clause",
+  "type": "library",
+  "authors": [
+    {
+      "name": "Rafal Martinez-Marjanski"
+    }
+  ],
+  "homepage": "http://archangel-design.com",
+  "autoload": {
+    "psr-0": {
+      "ADSEOTools": "src/"
+    }
+  },
+  "require": {
+    "guzzlehttp/guzzle": "~6.0"
+  }
+}
