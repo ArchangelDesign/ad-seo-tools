@@ -3,6 +3,9 @@
 namespace ADSEOTools;
 
 
+use ADSEOTools\Provider\GoogleComProvider;
+use ADSEOTools\Provider\ProviderInterface;
+
 class PositionReporter
 {
     private $connector;
@@ -12,11 +15,9 @@ class PositionReporter
         $this->connector = new \GuzzleHttp\Client();
     }
 
-    private function fetchRawResults($provider, array $keywords, $page = 0)
+    private function fetchRawResults(ProviderInterface $provider, array $keywords, $page = 0)
     {
-        $query = urlencode(implode('+', $keywords));
-        $p = $page == 0 ? "" : '&start=' . $page * 10;
-        $url = "http://google.com/search?q=$query" . $p;
+        $url = $provider->getSearchQuery($keywords, $page);
         $res = $this->connector->request('GET', $url);
 
         if ($res->getStatusCode() != 200) {
@@ -60,8 +61,17 @@ class PositionReporter
         return $res;
     }
 
-    public function getSearchResults($provider, array $keywords, $pages = 1)
+    public function getProvider($providerName)
     {
+        switch ($providerName) {
+            case 'google.com': return new GoogleComProvider();
+            default: return new GoogleComProvider();
+        }
+    }
+
+    public function getSearchResults($providerName, array $keywords, $pages = 1)
+    {
+        $provider = $this->getProvider($providerName);
         $pageResult = [];
         $resultCount = -1;
         for ($page = 0; $page < $pages; $page++) {
@@ -77,9 +87,9 @@ class PositionReporter
         ];
     }
 
-    public function getSiteRanking(array $keywords, $site, $pageCount = 3)
+    public function getSiteRanking(array $keywords, $site, $pageCount = 3, $provider = 'google.com')
     {
-        $searchResults = $this->getSearchResults('google.com', $keywords, $pageCount);
+        $searchResults = $this->getSearchResults($provider, $keywords, $pageCount);
         $position = -1;
         foreach ($searchResults['pages'] as $pos => $address) {
             if (strpos($address, $site) !== false) {
